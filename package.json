@@ -1,6 +1,6 @@
 {
   "name": "caa-data-local-collector",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "Local, user-driven Chromium collector and Excel add-in for CAA monthly exhibits.",
@@ -11,7 +11,7 @@
     "setup": "node scripts/setup.mjs",
     "build:portable": "powershell -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
     "start": "node src/server.js",
-    "test": "node --test test/parsers.test.js test/safety.test.js",
+    "test": "node --test test/parsers.test.js test/safety.test.js test/master-lists.test.js",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {

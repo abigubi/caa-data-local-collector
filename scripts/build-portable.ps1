@@ -36,6 +36,7 @@ $files = @(
   'Start.bat',
   'config.example.json',
   'manifest-local.xml',
+  'master-lists.json',
   'package.json',
   'package-lock.json'
 )

@@ -1,0 +1,18 @@
+{
+  "cef": [
+    "AWF", "MCI", "HYT", "BTZ", "VBF", "ISD", "HIO", "HYI", "IGI", "PAI",
+    "ADX", "CET", "EVT", "GDV", "GAB", "HTD", "USA", "ASG", "JCE", "RMT",
+    "RVT", "FUND", "BKT", "MGF", "WIA", "WIW", "AGD", "AOD", "CHW", "ETG",
+    "ETO", "GGZ", "HEQ", "LGI", "RGT", "EOD", "EOT", "NUW", "NIM", "NXP",
+    "NMI", "NUV", "MHF", "RQI", "RNP", "RFI", "NRO", "JRS"
+  ],
+  "reit": [
+    "AVB", "BRT", "CPT", "CSR", "EQR", "ESS", "IRT", "MAA", "NXRT", "UDR",
+    "APLE", "CLDT", "DRH", "HST", "PK", "PEB", "RLJ", "RHP", "INN", "SHO",
+    "XHR", "COLD", "EGP", "FR", "ILPT", "PLD", "REXR", "STAG", "TRNO", "ARE",
+    "BDN", "CUZ", "HIW", "HPP", "KRC", "PDM", "AKR", "BRX", "FRT", "KIM",
+    "KRG", "SKT", "UE", "AMH", "INVH", "ADC", "PINE", "BNL", "EPR", "EPRT",
+    "FCPT", "GTY", "GOOD", "GNL", "LXP", "NNN", "NTST", "OLP", "PSTL", "O",
+    "WPC"
+  ]
+}

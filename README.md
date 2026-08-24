@@ -4,7 +4,7 @@ This replaces cloud-origin collection with a local companion running on each aut
 
 It does not use stealth plugins, CAPTCHA bypasses, proxy rotation, or high-concurrency scraping. If a source asks for sign-in or verification, the collector leaves Chrome open for the user to complete it and then stops until the user retries.
 
-Normal site and Excel lookups are cache-only. Source traffic is possible only after a user clicks **Refresh 15-day cache now** in the local add-in. Fresh entries cannot be refreshed early. Runs are serialized, limited to 250 ticker attempts per source in 24 hours, and separated by at least 2 minutes. A 403, 429, or 503 stops the run immediately and creates a persistent 24-hour circuit-breaker cooldown.
+Normal site and Excel lookups are cache-only. Source traffic is possible only after a user clicks an explicit local refresh button. Fresh entries cannot be refreshed early. Runs are serialized, limited to 250 ticker attempts per source in 24 hours, and separated by at least 2 minutes. A 403, 429, or 503 stops the run immediately and creates a persistent 24-hour circuit-breaker cooldown.
 
 ## Download
 
@@ -43,7 +43,7 @@ Do not place the shared installation inside another user's OneDrive. Each user s
 ```mermaid
 flowchart LR
     X["Excel local add-in"] -->|"ordinary lookup"| C["15-day local JSON cache"]
-    X -->|"manual refresh button"| G["safety guard"]
+    X -->|"manual ticker or master refresh"| G["safety guard"]
     G --> B["visible dedicated Chrome profile"]
     B --> CC["CEFConnect"]
     B --> SA["Seeking Alpha"]
@@ -110,26 +110,28 @@ The add-in and the original hosted add-in have different IDs, so they can coexis
 1. Click **Open local collector browser** in the task pane.
 2. Complete any CEFConnect or Seeking Alpha login/verification in that visible browser profile. Do not close the profile if a challenge is waiting.
 3. Paste or select up to 20 tickers. Click **Use cache & write to Excel** for ordinary work.
-4. About every 15 days, click **Refresh 15-day cache now** yourself. Only stale or missing tickers contact the sources.
+4. About every 15-30 days, click the CEF and REIT master-cache refresh buttons yourself. Only stale or missing tickers contact the sources.
 
 The suggested operating cycle is:
 
 1. Start the local companion.
-2. Refresh the exhibit's requested ticker set once when the cache is due.
+2. Click **Refresh CEF master cache** and **Refresh REIT master cache** when the cache is due. Each is a separate intentionally slow job; let one finish before starting the other.
 3. Review any unavailable or cached-data warnings.
-4. Write the values into Excel as often as needed without additional source traffic.
+4. For each exhibit, paste or select its 5-15 tickers and use **Use cache & write to Excel**. This makes no source request.
 5. Close the PowerShell companion window when finished.
+
+The supplied master lists contain 48 CEFs and 61 unique REITs. Ten duplicated REIT entries in the original list were consolidated so each symbol is attempted once. Edit `master-lists.json` if the universe changes; the buttons read their displayed counts from that file when the add-in opens. Master refreshes populate the cache only and never write the full master list into the active workbook.
 
 ### Monthly multi-workbook workflow
 
 The defaults are sized for roughly 10–15 workbooks containing 5–15 tickers each, up to about 225 ticker rows in a monthly cycle.
 
-1. Start with the first workbook and load its ticker cells.
-2. Click **Refresh 15-day cache now**. Only missing or at-least-15-day-old tickers are collected.
-3. Write the cached data to the workbook.
-4. Move to the next workbook and repeat. Tickers already refreshed for an earlier workbook are skipped without contacting the source.
-5. If the two-minute run guard has not elapsed, wait for the displayed `nextAt` time and continue.
-6. If more than 250 unique tickers for one source are needed, continue the remainder on the following day instead of raising the limit.
+1. On one designated work PC, run the two master-cache jobs every 15-30 days.
+2. Leave the visible collector browser and companion terminal open until each job finishes.
+3. Open each workbook, load its ticker cells, and click **Use cache & write to Excel**.
+4. Review warnings for any ticker that was unavailable during the master refresh.
+5. Use **Refresh 15-day cache now** only for an individual stale or missing ticker outside the master lists.
+6. If the two-minute run guard has not elapsed, wait for the displayed `nextAt` time and continue.
 
 Collection is intentionally slow. A 15-ticker workbook may take several minutes, and a mostly unique 10–15 workbook cycle may take around an hour or more. Keep the computer awake and the companion terminal open. Do not start overlapping refreshes from multiple PCs sharing the same public IP; designate one PC as the live refresher for a cycle.
 
@@ -181,7 +183,7 @@ Cells are ordinary values, not formulas. Cached rows are highlighted yellow. Una
 
 - No headless mode, stealth patches, proxy rotation, CAPTCHA bypass, or cookie export.
 - One visible persistent browser profile per PC.
-- Maximum 20 tickers in an individual request.
+- Maximum 20 tickers in an individual workbook request; the two built-in master jobs are separately limited to their reviewed lists.
 - 6.5-second delay and no request concurrency.
 - 250 ticker attempts per source during any rolling 24-hour period.
 - Two-minute minimum interval between runs against the same source.
@@ -234,6 +236,7 @@ Live smoke tests obey the same cache and safety limits as the add-in.
 ## Project layout
 
 - `manifest-local.xml`: separate Excel add-in manifest.
+- `master-lists.json`: editable reviewed CEF and REIT cache-refresh universes.
 - `public/`: task-pane interface and Excel writing logic.
 - `src/collectors/`: source-specific collectors.
 - `src/cache.js`: persistent cache and IP-safety state.

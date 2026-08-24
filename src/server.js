@@ -8,6 +8,7 @@ import { CacheStore } from "./cache.js";
 import { BrowserManager } from "./browser-manager.js";
 import { Orchestrator } from "./orchestrator.js";
 import { statusBus } from "./status.js";
+import { masterLists } from "./master-lists.js";
 
 const cache = new CacheStore();
 const browserManager = new BrowserManager();
@@ -59,9 +60,23 @@ const handler = async (req, res) => {
   if (req.method === "OPTIONS") return res.writeHead(204).end();
   const url = new URL(req.url, `https://${req.headers.host ?? `localhost:${config.port}`}`);
   try {
-    if (req.method === "GET" && url.pathname === "/health") return json(res, 200, { ok: true, version: "1.1.0", cacheDays: config.cacheDays });
+    if (req.method === "GET" && url.pathname === "/health") return json(res, 200, { ok: true, version: "1.2.0", cacheDays: config.cacheDays });
     if (req.method === "GET" && url.pathname === "/api/status") return json(res, 200, statusBus.current);
     if (req.method === "GET" && url.pathname === "/api/cache/status") return json(res, 200, cache.status());
+    if (req.method === "GET" && url.pathname === "/api/master-lists") return json(res, 200, {
+      cef: masterLists.cef,
+      reit: masterLists.reit,
+      counts: { cef: masterLists.cef.length, reit: masterLists.reit.length }
+    });
+    if (req.method === "POST" && url.pathname === "/api/master-refresh") {
+      const payload = await body(req);
+      if (payload.mode !== "cef" && payload.mode !== "reit") return json(res, 400, { error: "mode must be cef or reit." });
+      const tickers = masterLists[payload.mode];
+      const result = payload.mode === "cef"
+        ? await orchestrator.cef({ tickers, refresh: true }, { maxTickers: 250 })
+        : await orchestrator.reits({ tickers, refresh: true }, { maxTickers: 250 });
+      return json(res, 200, { ...result, mode: payload.mode, masterCount: tickers.length });
+    }
     if (req.method === "GET" && url.pathname === "/api/nav-dates") return json(res, 200, { dates: await orchestrator.navDates({ live: url.searchParams.get("live") === "1" }) });
     if (req.method === "POST" && url.pathname === "/api/browser/open") return json(res, 200, await browserManager.openHomes());
     if (req.method === "POST" && (url.pathname === "/api/cef" || url.pathname === "/api/funds")) return json(res, 200, await orchestrator.cef(await body(req)));

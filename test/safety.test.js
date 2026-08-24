@@ -48,3 +48,22 @@ test("manual refresh does not contact a source while cache is fresh", async () =
     fs.rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("internal master refresh can process more than the workbook limit", async () => {
+  const { directory, cache } = temporaryCache();
+  const browserManager = { page: async () => { throw new Error("browser should not open"); } };
+  const tickers = Array.from({ length: 48 }, (_, index) => `T${index}`);
+  try {
+    tickers.forEach((ticker) => cache.set("cef", ticker, {
+      ticker,
+      name: ticker,
+      fetchedAt: new Date().toISOString(),
+      holdings: 1,
+      sharesOutstanding: 2
+    }));
+    const result = await new Orchestrator({ cache, browserManager }).cef({ tickers, refresh: true }, { maxTickers: 250 });
+    assert.equal(result.results.length, 48);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});

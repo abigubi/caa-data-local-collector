@@ -28,8 +28,8 @@ export class Orchestrator {
     statusBus.update(message, { state, ...extra });
   }
 
-  async cef(input) {
-    const tickers = normalizeTickers(input.tickers);
+  async cef(input, { maxTickers = 20 } = {}) {
+    const tickers = normalizeTickers(input.tickers, maxTickers);
     if (!tickers.length) throw new Error("Enter at least one valid ticker.");
     return this.runLocked("cef", async () => {
       const refreshRequested = input.refresh === true;
@@ -102,8 +102,8 @@ export class Orchestrator {
     return report;
   }
 
-  async reits(input) {
-    const tickers = normalizeTickers(input.tickers);
+  async reits(input, { maxTickers = 20 } = {}) {
+    const tickers = normalizeTickers(input.tickers, maxTickers);
     if (!tickers.length) throw new Error("Enter at least one valid ticker.");
     return this.runLocked("reit", async () => {
       const refreshRequested = input.refresh === true;

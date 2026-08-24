@@ -44,6 +44,13 @@ UTF</textarea>
       <div class="progress"><div id="progress-bar"></div></div>
     </section>
 
+    <section class="card">
+      <div class="step"><span>↻</span><div><strong>Refresh the shared master cache</strong><small>Run every 15–30 days. This fills the cache only and does not write to Excel.</small></div></div>
+      <button id="refresh-cef-master" type="button" class="secondary refresh">Refresh CEF master cache (48)</button>
+      <button id="refresh-reit-master" type="button" class="secondary refresh">Refresh REIT master cache (61)</button>
+      <p class="guard-note">These are intentionally slow, serialized jobs. Fresh tickers are skipped, duplicate tickers were removed, and source-protection responses stop the job immediately.</p>
+    </section>
+
     <section class="card preview-card">
       <div class="step"><span>3</span><div><strong>Preview</strong><small>Cached values are marked yellow; unavailable values are red in Excel.</small></div></div>
       <div id="preview" class="preview">No results yet.</div>

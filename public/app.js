@@ -1,4 +1,4 @@
-const state = { mode: "cef", excel: false, busy: false, last: null };
+const state = { mode: "cef", excel: false, busy: false, last: null, masterCounts: { cef: 48, reit: 61 } };
 const el = (id) => document.getElementById(id);
 
 const headers = {
@@ -12,7 +12,11 @@ function tickers() {
 
 function updateCount() { el("count").textContent = `${tickers().length} / 20`; }
 function setStatus(message, kind = "") { el("status").textContent = message; el("status").className = `status ${kind}`; }
-function setBusy(value) { state.busy = value; el("run").disabled = value; el("refresh-cache").disabled = value; el("open-browser").disabled = value; el("progress-bar").style.width = value ? "75%" : "0"; }
+function setBusy(value) {
+  state.busy = value;
+  ["run", "refresh-cache", "open-browser", "refresh-cef-master", "refresh-reit-master"].forEach((id) => { el(id).disabled = value; });
+  el("progress-bar").style.width = value ? "75%" : "0";
+}
 function valueOrNA(value) { return value === null || value === undefined ? "NA" : value; }
 
 function cefRows(results, includeTax) {
@@ -99,6 +103,37 @@ async function run(refresh = false) {
   } finally { setBusy(false); }
 }
 
+async function refreshMaster(mode) {
+  const count = state.masterCounts[mode];
+  if (!globalThis.confirm(`Refresh stale or missing entries in the ${mode.toUpperCase()} master cache (${count} unique tickers)? This intentionally slow job fills the cache only and will not write to Excel.`)) return;
+  setBusy(true);
+  setStatus(`Starting the ${mode.toUpperCase()} master-cache refresh. Fresh entries will be skipped...`);
+  try {
+    const response = await fetch("/api/master-refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode })
+    });
+    const result = await response.json();
+    if (!response.ok) throw Object.assign(new Error(result.error || `Request returned ${response.status}.`), { code: result.code });
+    const warnings = result.errors?.length ?? 0;
+    setStatus(`${mode.toUpperCase()} master cache checked: ${result.results.length}/${result.masterCount} available.${warnings ? ` ${warnings} warning(s).` : ""} No workbook was changed.`, warnings ? "warning" : "");
+  } catch (error) {
+    setStatus(error.message, error.code === "BROWSER_ATTENTION_REQUIRED" ? "warning" : "error");
+  } finally { setBusy(false); }
+}
+
+async function loadMasterCounts() {
+  try {
+    const response = await fetch("/api/master-lists");
+    const payload = await response.json();
+    if (!response.ok) return;
+    state.masterCounts = payload.counts;
+    el("refresh-cef-master").textContent = `Refresh CEF master cache (${payload.counts.cef})`;
+    el("refresh-reit-master").textContent = `Refresh REIT master cache (${payload.counts.reit})`;
+  } catch {}
+}
+
 async function readSelection() {
   await Excel.run(async (context) => {
     const range = context.workbook.getSelectedRange();
@@ -133,6 +168,8 @@ document.querySelectorAll("[data-mode]").forEach((button) => button.addEventList
 el("tickers").addEventListener("input", updateCount);
 el("run").addEventListener("click", () => run(false));
 el("refresh-cache").addEventListener("click", () => run(true));
+el("refresh-cef-master").addEventListener("click", () => refreshMaster("cef"));
+el("refresh-reit-master").addEventListener("click", () => refreshMaster("reit"));
 el("read-selection").addEventListener("click", () => readSelection().catch((error) => setStatus(error.message, "error")));
 el("open-browser").addEventListener("click", async () => {
   setBusy(true); setStatus("Opening the dedicated Chrome profile...");
@@ -154,3 +191,4 @@ setInterval(async () => {
 }, 1200);
 
 updateCount();
+loadMasterCounts();
