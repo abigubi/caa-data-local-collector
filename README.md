@@ -10,6 +10,18 @@ Normal site and Excel lookups are cache-only. Source traffic is possible only af
 
 This is a private repository. Sign in to the authorized GitHub account, then use either method.
 
+### Recommended: portable Windows release
+
+The portable ZIP includes its own Node runtime and all JavaScript/PDF/browser-control libraries. The user does not install Node, npm, Python, Playwright, or PDF software.
+
+1. Open the repository's **Releases** page.
+2. Download `CAADataLocal-Windows-x64.zip` from the newest release.
+3. Extract the entire ZIP to a normal folder such as `C:\CAADataLocal`.
+4. Double-click `Setup.bat` once.
+5. Double-click `Start.bat` whenever the add-in is used, and leave that window open.
+
+Required external software is limited to Windows, desktop Microsoft Excel, and an installed Chrome or Edge browser. The one-time localhost certificate and Excel manifest installation are still required by Office.
+
 ### Clone with Git
 
 ```powershell
@@ -55,6 +67,10 @@ The hosted site and ordinary Excel actions can read the cache, but they cannot i
 - Excel: a local task pane writes ordinary numeric values to `CEF Data` or `REIT Data`.
 
 ## Install on each Windows PC
+
+For the portable release, skip Node installation and use `Setup.bat`/`Start.bat` as described above.
+
+For a source-code installation:
 
 1. Install [Node.js 22 or newer](https://nodejs.org/).
 2. Install or update desktop Microsoft Excel from Microsoft 365.
@@ -225,3 +241,5 @@ Live smoke tests obey the same cache and safety limits as the add-in.
 - `src/server.js`: local HTTPS service and compatibility endpoints.
 - `scripts/`: setup and live smoke checks.
 - `test/`: parser and safety-guard tests.
+- `Setup.bat` and `Start.bat`: double-click launchers that use the bundled runtime when present.
+- `.github/workflows/build-portable.yml`: reproducible private Windows ZIP build.

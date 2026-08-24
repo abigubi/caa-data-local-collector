@@ -59,7 +59,7 @@ const handler = async (req, res) => {
   if (req.method === "OPTIONS") return res.writeHead(204).end();
   const url = new URL(req.url, `https://${req.headers.host ?? `localhost:${config.port}`}`);
   try {
-    if (req.method === "GET" && url.pathname === "/health") return json(res, 200, { ok: true, version: "1.0.0", cacheDays: config.cacheDays });
+    if (req.method === "GET" && url.pathname === "/health") return json(res, 200, { ok: true, version: "1.1.0", cacheDays: config.cacheDays });
     if (req.method === "GET" && url.pathname === "/api/status") return json(res, 200, statusBus.current);
     if (req.method === "GET" && url.pathname === "/api/cache/status") return json(res, 200, cache.status());
     if (req.method === "GET" && url.pathname === "/api/nav-dates") return json(res, 200, { dates: await orchestrator.navDates({ live: url.searchParams.get("live") === "1" }) });

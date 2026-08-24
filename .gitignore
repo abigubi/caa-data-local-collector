@@ -5,3 +5,4 @@ data/request-log.jsonl
 data/chromium-profile/
 tmp/
 npm-debug.log*
+dist/
