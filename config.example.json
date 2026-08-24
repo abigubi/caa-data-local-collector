@@ -1,0 +1,13 @@
+{
+  "port": 4317,
+  "cacheDays": 15,
+  "requestDelayMs": 4000,
+  "manualRefreshOnly": true,
+  "minSourceRunIntervalMinutes": 10,
+  "dailyTickerBudgetPerSource": 40,
+  "blockedSourceCooldownHours": 24,
+  "browserDebugPort": 9222,
+  "browserExecutable": "",
+  "estimateYears": [2026, 2027, 2028],
+  "secUserAgent": ""
+}

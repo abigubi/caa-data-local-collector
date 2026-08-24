@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CAA Data Local Collector</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <strong>CAA Data Local</strong>
+        <small>Corporate Advisory Associates</small>
+      </div>
+      <span id="connection" class="pill">Connecting...</span>
+    </header>
+
+    <div class="mode" role="tablist" aria-label="Data type">
+      <button type="button" data-mode="cef" class="active">CEF</button>
+      <button type="button" data-mode="reit">REIT</button>
+    </div>
+
+    <section class="card">
+      <div class="step"><span>1</span><div><strong>Choose tickers</strong><small>Up to 20. Fresh cache entries make no source request.</small></div></div>
+      <button id="read-selection" type="button" class="secondary" disabled>Read selected Excel cells</button>
+      <label for="tickers">Tickers <span id="count">3 / 20</span></label>
+      <textarea id="tickers" rows="5">PSF
+PDI
+UTF</textarea>
+      <label id="tax-row" class="check"><input id="include-tax" type="checkbox"> Include optional SEC tax-basis unrealized value</label>
+      <label id="nav-row" class="hidden" for="nav-date">Consensus NAV as of</label>
+      <select id="nav-date" class="hidden"><option value="">Latest available</option></select>
+      <p class="guard-note">Safety guard: ordinary Excel lookups are cache-only. Live source traffic occurs only from the manual refresh button, and fresh tickers cannot be refreshed early.</p>
+    </section>
+
+    <section class="card">
+      <div class="step"><span>2</span><div><strong>Write the data</strong><small>Chrome stays visible and runs one ticker at a time.</small></div></div>
+      <button id="run" type="button" class="primary">Use cache & write to Excel</button>
+      <button id="refresh-cache" type="button" class="secondary refresh">Refresh 15-day cache now</button>
+      <button id="open-browser" type="button" class="secondary">Open local collector browser</button>
+      <div id="status" class="status">Ready.</div>
+      <div class="progress"><div id="progress-bar"></div></div>
+    </section>
+
+    <section class="card preview-card">
+      <div class="step"><span>3</span><div><strong>Preview</strong><small>Cached values are marked yellow; unavailable values are red in Excel.</small></div></div>
+      <div id="preview" class="preview">No results yet.</div>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
