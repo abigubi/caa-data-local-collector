@@ -32,7 +32,7 @@ UTF</textarea>
       <label id="tax-row" class="check"><input id="include-tax" type="checkbox"> Include optional SEC tax-basis unrealized value</label>
       <label id="nav-row" class="hidden" for="nav-date">Consensus NAV as of</label>
       <select id="nav-date" class="hidden"><option value="">Latest available</option></select>
-      <p class="guard-note">Safety guard: ordinary Excel lookups are cache-only. Live source traffic occurs only from the manual refresh button, and fresh tickers cannot be refreshed early.</p>
+      <p class="guard-note">Safety guard: ordinary Excel lookups are cache-only. Manual refresh collects one ticker at a time with 6.5-second pauses, and fresh tickers are automatically skipped.</p>
     </section>
 
     <section class="card">

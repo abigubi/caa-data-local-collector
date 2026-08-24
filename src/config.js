@@ -6,10 +6,10 @@ export const ROOT = path.resolve(import.meta.dirname, "..");
 const defaults = {
   port: 4317,
   cacheDays: 15,
-  requestDelayMs: 4000,
+  requestDelayMs: 6500,
   manualRefreshOnly: true,
-  minSourceRunIntervalMinutes: 10,
-  dailyTickerBudgetPerSource: 40,
+  minSourceRunIntervalMinutes: 2,
+  dailyTickerBudgetPerSource: 250,
   blockedSourceCooldownHours: 24,
   browserDebugPort: 9222,
   browserExecutable: "",

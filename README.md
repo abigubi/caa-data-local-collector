@@ -1,10 +1,10 @@
 # CAA Data Local Collector
 
-This replaces cloud-origin collection with a local companion running on each authorized PC. It opens a normal visible Chrome/Edge window with a dedicated persistent profile, refreshes only requested stale or missing tickers, waits 4 seconds between source requests, and caches each result for 15 days.
+This replaces cloud-origin collection with a local companion running on each authorized PC. It opens a normal visible Chrome/Edge window with a dedicated persistent profile, refreshes only requested stale or missing tickers, waits 6.5 seconds between source requests, and caches each result for 15 days.
 
 It does not use stealth plugins, CAPTCHA bypasses, proxy rotation, or high-concurrency scraping. If a source asks for sign-in or verification, the collector leaves Chrome open for the user to complete it and then stops until the user retries.
 
-Normal site and Excel lookups are cache-only. Source traffic is possible only after a user clicks **Refresh 15-day cache now** in the local add-in. Fresh entries cannot be refreshed early. Runs are serialized, limited to 40 ticker attempts per source in 24 hours, and separated by at least 10 minutes. A 403, 429, or 503 stops the run immediately and creates a persistent 24-hour circuit-breaker cooldown.
+Normal site and Excel lookups are cache-only. Source traffic is possible only after a user clicks **Refresh 15-day cache now** in the local add-in. Fresh entries cannot be refreshed early. Runs are serialized, limited to 250 ticker attempts per source in 24 hours, and separated by at least 2 minutes. A 403, 429, or 503 stops the run immediately and creates a persistent 24-hour circuit-breaker cooldown.
 
 ## Download
 
@@ -104,6 +104,19 @@ The suggested operating cycle is:
 4. Write the values into Excel as often as needed without additional source traffic.
 5. Close the PowerShell companion window when finished.
 
+### Monthly multi-workbook workflow
+
+The defaults are sized for roughly 10–15 workbooks containing 5–15 tickers each, up to about 225 ticker rows in a monthly cycle.
+
+1. Start with the first workbook and load its ticker cells.
+2. Click **Refresh 15-day cache now**. Only missing or at-least-15-day-old tickers are collected.
+3. Write the cached data to the workbook.
+4. Move to the next workbook and repeat. Tickers already refreshed for an earlier workbook are skipped without contacting the source.
+5. If the two-minute run guard has not elapsed, wait for the displayed `nextAt` time and continue.
+6. If more than 250 unique tickers for one source are needed, continue the remainder on the following day instead of raising the limit.
+
+Collection is intentionally slow. A 15-ticker workbook may take several minutes, and a mostly unique 10–15 workbook cycle may take around an hour or more. Keep the computer awake and the companion terminal open. Do not start overlapping refreshes from multiple PCs sharing the same public IP; designate one PC as the live refresher for a cycle.
+
 Cache data and the dedicated browser profile live under `data/` and are excluded from version control. No cookies or credentials are copied into this project; sign-in remains inside Chrome's dedicated profile.
 
 ## Optional: keep the ChatGPT Work site UI
@@ -122,9 +135,10 @@ In ChatGPT Work, change the site so these requests use the local base URL and re
 Copy defaults are in `config.example.json`:
 
 - `cacheDays`: 15 by default.
-- `requestDelayMs`: four-second delay between source requests. Do not reduce it without source approval.
+- `requestDelayMs`: 6.5-second delay between source requests. Do not reduce it without source approval.
 - `manualRefreshOnly`: keep enabled so hosted-site and ordinary Excel lookups never trigger collection.
-- `minSourceRunIntervalMinutes` and `dailyTickerBudgetPerSource`: persistent IP-safety limits.
+- `minSourceRunIntervalMinutes`: two minutes between manual runs against the same source.
+- `dailyTickerBudgetPerSource`: 250 ticker attempts per rolling 24 hours, enough for the expected monthly workbook cycle.
 - `blockedSourceCooldownHours`: circuit-breaker duration after 403, 429, or 503.
 - `estimateYears`: the three FFO columns written to Excel.
 - `browserExecutable`: optional explicit Chrome or Edge path.
@@ -152,9 +166,9 @@ Cells are ordinary values, not formulas. Cached rows are highlighted yellow. Una
 - No headless mode, stealth patches, proxy rotation, CAPTCHA bypass, or cookie export.
 - One visible persistent browser profile per PC.
 - Maximum 20 tickers in an individual request.
-- Four-second delay and no request concurrency.
-- Forty ticker attempts per source during any rolling 24-hour period.
-- Ten-minute minimum interval between runs against the same source.
+- 6.5-second delay and no request concurrency.
+- 250 ticker attempts per source during any rolling 24-hour period.
+- Two-minute minimum interval between runs against the same source.
 - Immediate stop and 24-hour cooldown on 403, 429, or 503.
 - Stale data remains readable when a source is unavailable.
 
